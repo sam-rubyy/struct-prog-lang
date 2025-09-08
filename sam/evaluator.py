@@ -1,15 +1,21 @@
 from tokenizer import tokenize
 from parser import parse
 
-__printed_string = None
+printed_string = None
 
 def evaluate(ast):
-    global __printed_string
-    __printed_string = None
+    global printed_string
+    printed_string = None
+    if ast["tag"] == "program":
+        last_value = None
+        for statement in ast["statements"]:
+            value = evaluate(statement)
+            last_value = value
+        return last_value
     if ast["tag"] == "print":
         value = evaluate(ast["value"])
         s = str(value)
-        __printed_string = s
+        printed_string = s
         print(s)
     if ast["tag"] == "number":
         return ast["value"]
@@ -80,10 +86,10 @@ def test_evaluate_expression():
 
 def test_evaluate_print():
     print("testing evaluate print")
-    assert eval("print 3") == None
-    assert __printed_string == "3"
-    assert eval("print 3.14") == None
-    assert __printed_string == "3.14"
+    assert eval("print 3") == None    
+    assert printed_string == "3"
+    assert eval("print 3.14") == None    
+    assert printed_string == "3.14"
 
 
 
