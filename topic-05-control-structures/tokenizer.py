@@ -3,6 +3,13 @@ import re
 # Define patterns for tokens
 patterns = [
     [r"print","print"],
+    [r"true","true"],
+    [r"false","false"],
+    [r"if","if"],
+    [r"else","else"],
+    [r"while","while"],
+    [r"continue","continue"],
+    [r"break","break"],
     [r"\d*\.\d+|\d+\.\d*|\d+", "number"],
     [r"[a-zA-Z_][a-zA-Z0-9_]*", "identifier"],  # identifiers
     [r"\+", "+"],
@@ -11,7 +18,20 @@ patterns = [
     [r"\/", "/"],
     [r"\(", "("],
     [r"\)", ")"],
+    [r"\}", "}"],
+    [r"\{", "{"],
     [r"\;", ";"],
+    [r"\<\=", "<="],
+    [r"\<", "<"],
+    [r"\>\=", ">="],
+    [r"\>", ">"],
+    [r"\=\=", "=="],
+    [r"\!\=", "!="],
+    [r"\!", "!"],
+    [r"\&\&", "&&"],
+    [r"\|\|", "||"],
+    [r"\=", "="],
+
     [r"\s+","whitespace"],
     [r".","error"]
 ]
@@ -41,6 +61,9 @@ def tokenize(characters):
                 token["value"] = float(token["value"])
             else:
                 token["value"] = int(token["value"])
+        if token["tag"] in ["true","false"]:
+            token["value"] = (token["tag"] == "true")
+            token["tag"] = "boolean"
         if token["tag"] != "whitespace":
             tokens.append(token)
         position = match.end()
@@ -54,7 +77,29 @@ def tokenize(characters):
 
 def test_simple_token():
     print("test simple token")
-    examples = "+-*/();"
+    examples = [item[1] for item in [
+        [r"\+", "+"],
+        [r"\-", "-"],
+        [r"\*", "*"],
+        [r"\/", "/"],
+        [r"\(", "("],
+        [r"\)", ")"],
+        [r"\;", ";"],
+        [r"\}", "}"],
+        [r"\{", "{"],
+        [r"\<\=", "<="],
+        [r"\<", "<"],
+        [r"\>\=", ">="],
+        [r"\>", ">"],
+        [r"\=\=", "=="],
+        [r"\!\=", "!="],
+        [r"\!", "!"],
+        [r"\&\&", "&&"],
+        [r"\|\|", "||"],
+        [r"\=", "="]
+    ]]
+
+
     for example in examples:
         t = tokenize(example)[0]
         assert t["tag"] == example
@@ -74,6 +119,13 @@ def test_number_token():
         assert t[0]["tag"] == "number"
         assert t[0]["value"] == float(s)
 
+def test_boolean_tokens():
+    print("test boolean tokens")
+    for s in ["true","false"]:
+        t = tokenize(s)
+        assert len(t) == 2
+        assert t[0]["tag"] == "boolean"
+        assert t[0]["value"] == (s == "true")
 
 def test_multiple_tokens():
     print("test multiple tokens")
@@ -88,7 +140,7 @@ def test_whitespace():
 def test_keywords():
     print("test keywords...")
     for keyword in [
-        "print",
+        "print","if","else","while","break","continue"
     ]:
         t = tokenize(keyword)
         assert len(t) == 2
@@ -116,6 +168,7 @@ def test_error():
 if __name__ == "__main__":
     test_simple_token()
     test_number_token()
+    test_boolean_tokens()
     test_multiple_tokens()
     test_whitespace()
     test_keywords()
